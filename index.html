@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="./three.js"></script>
+    <script src="./WebGL.js"></script>
+    <script src="./OrbitControls.js"></script>
+    <script src="./stats.min.js"></script>
+    <script src="./initThree.js"></script>
+    <script src="./GLTFLoader.js"></script>
+    <title>init</title>
+    <style>
+      #three {
+        width: 500px;
+        height: 400px;
+        border: 3px solid #dddddd;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="three"></div>
+  </body>
+  <script>
+    init(500, 400, true, true);
+    // 定义材质
+    var geometry = new THREE.PlaneBufferGeometry(500, 500);
+    var material = new THREE.MeshPhongMaterial({
+      color: 0x999999,
+      depthWrite: false,
+    });
+    // 添加地面
+    var ground = new THREE.Mesh(geometry, material);
+    ground.position.set(0, 0, 0);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+    // 地面网格
+    var grid = new THREE.GridHelper(500, 100, 0x000000, 0x000000);
+    //   grid.position.y = -5;
+    grid.material.opacity = 0.2;
+    grid.material.transparent = true;
+    scene.add(grid);
+
+    // 加载模型
+    var loader = new THREE.GLTFLoader();
+    var mixer, clock;
+    clock = new THREE.Clock();
+    loader.load("./SimpleSkinning.gltf", function (gltf) {
+      console.log(gltf);
+      scene.add(gltf.scene);
+      mixer = new THREE.AnimationMixer(gltf.scene);
+      mixer.clipAction(gltf.animations[0]).setDuration(0.1).play();
+    });
+    function render() {
+      // 循环动画
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+      if (mixer) mixer.update(clock.getDelta());
+      stats.update();
+    }
+    render();
+  </script>
+</html>
